@@ -1,1 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b6b57">
+  <meta name="description" content="Read and listen to the Quran with English, French and transliteration support.">
+  <link rel="manifest" href="manifest.json">
+  <title>Quran Reader</title>
+  <style>
+    :root { color-scheme: light; --green:#0b6b57; --ink:#19332d; --muted:#66756f; --paper:#fff; --bg:#f4f8f6; --line:#dce8e3; --gold:#c79537; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family: system-ui,-apple-system,"Segoe UI",sans-serif; color:var(--ink); background:var(--bg); }
+    header { color:white; background:linear-gradient(135deg,#075441,#129071); padding:2.5rem 1rem 2rem; }
+    .wrap { width:min(100% - 2rem, 900px); margin:auto; }
+    h1 { margin:0 0 .4rem; font-size:clamp(1.8rem,5vw,2.8rem); }
+    header p { margin:.2rem 0 0; opacity:.9; }
+    .controls { display:grid; grid-template-columns:1fr 1fr auto; gap:.75rem; margin-top:1.5rem; align-items:end; }
+    label { display:grid; gap:.35rem; font-size:.85rem; font-weight:650; }
+    select, button { min-height:44px; border:1px solid var(--line); border-radius:10px; padding:.65rem .8rem; font:inherit; background:var(--paper); color:var(--ink); }
+    button { cursor:pointer; font-weight:700; }
+    button.primary { background:var(--gold); border-color:var(--gold); color:#fff; }
+    button:disabled { opacity:.55; cursor:not-allowed; }
+    main { padding:1.5rem 0 3rem; }
+    .notice { color:var(--muted); margin:.5rem 0 1rem; }
+    .ayah { background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:1.2rem; margin:1rem 0; box-shadow:0 3px 12px #1b59400b; }
+    .ayah-head { display:flex; justify-content:space-between; gap:1rem; color:var(--muted); font-size:.85rem; }
+    .arabic { direction:rtl; text-align:right; font-family: Georgia,"Times New Roman",serif; font-size:clamp(1.65rem,4vw,2.25rem); line-height:1.9; margin:1rem 0; }
+    .translit { color:#3a7065; font-style:italic; line-height:1.6; }
+    .translation { line-height:1.65; margin:.65rem 0 0; }
+    .translation strong { color:var(--green); }
+    audio { width:100%; margin-top:1rem; height:38px; }
+    .empty { text-align:center; padding:3rem 1rem; color:var(--muted); }
+    .credit { text-align:center; color:var(--muted); font-size:.8rem; margin-top:2rem; }
+    @media (max-width:650px) { .controls { grid-template-columns:1fr; } .ayah-head { flex-wrap:wrap; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>Quran Reader</h1>
+      <p>Read, listen and reflect — English, French and transliteration included.</p>
+      <div class="controls">
+        <label>Surah<select id="surah" aria-label="Choose a surah"></select></label>
+        <label>Translation<select id="language" aria-label="Choose translation"></select></label>
+        <button id="load" class="primary">Load surah</button>
+      </div>
+    </div>
+  </header>
+  <main class="wrap">
+    <p id="status" class="notice" role="status">Choose a surah to begin.</p>
+    <section id="reader" aria-live="polite"><div class="empty">Your selected surah will appear here.</div></section>
+    <p class="credit">Quran text, translations and audio provided by <a href="https://alquran.cloud/api" target="_blank" rel="noopener">Al Quran Cloud API</a>.</p>
+  </main>
+  <script>
+    const API = 'https://api.alquran.cloud/v1';
+    const surahSelect = document.querySelector('#surah');
+    const languageSelect = document.querySelector('#language');
+    const loadButton = document.querySelector('#load');
+    const status = document.querySelector('#status');
+    const reader = document.querySelector('#reader');
 
+    const translations = {
+      en: { label: 'English', edition: 'en.sahih' },
+      fr: { label: 'Français', edition: 'fr.hamidullah' }
+    };
+
+    function setStatus(message) { status.textContent = message; }
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>'"]/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
+    }
+
+    async function loadSurahs() {
+      try {
+        const response = await fetch(`${API}/surah`);
+        if (!response.ok) throw new Error('Could not load surahs');
+        const { data } = await response.json();
+        data.forEach(surah => {
+          const option = document.createElement('option');
+          option.value = surah.number;
+          option.textContent = `${surah.number}. ${surah.englishName} — ${surah.name}`;
+          surahSelect.append(option);
+        });
+        const saved = localStorage.getItem('quran-surah');
+        if (saved) surahSelect.value = saved;
+      } catch (error) { setStatus('Unable to load the surah list. Please check your connection and try again.'); }
+    }
+
+    async function loadReader() {
+      const surah = surahSelect.value;
+      const lang = languageSelect.value;
+      if (!surah) return;
+      loadButton.disabled = true;
+      reader.innerHTML = '';
+      setStatus('Loading Arabic text, transliteration, translation and recitation…');
+      try {
+        const editionList = `quran-uthmani,${translations[lang].edition},en.transliteration,ar.alafasy`;
+        const response = await fetch(`${API}/surah/${surah}/editions/${editionList}`);
+        if (!response.ok) throw new Error('Request failed');
+        const result = await response.json();
+        const editions = result.data;
+        const arabic = editions.find(item => item.edition.identifier === 'quran-uthmani');
+        const translated = editions.find(item => item.edition.identifier === translations[lang].edition);
+        const transliteration = editions.find(item => item.edition.identifier === 'en.transliteration');
+        const audio = editions.find(item => item.edition.identifier === 'ar.alafasy');
+        if (!arabic || !translated || !transliteration || !audio) throw new Error('Some editions are unavailable');
+
+        const fragment = document.createDocumentFragment();
+        arabic.ayahs.forEach((ayah, index) => {
+          const card = document.createElement('article');
+          card.className = 'ayah';
+          card.innerHTML = `
+            <div class="ayah-head"><span>Ayah ${ayah.numberInSurah}</span><span>${escapeHtml(ayah.juz ? `Juz ${ayah.juz}` : '')}</span></div>
+            <div class="arabic" lang="ar">${escapeHtml(ayah.text)}</div>
+            <div class="translit" lang="en">${escapeHtml(transliteration.ayahs[index].text)}</div>
+            <p class="translation" lang="${lang}"><strong>${translations[lang].label}:</strong> ${escapeHtml(translated.ayahs[index].text)}</p>
+            <audio controls preload="none" src="${escapeHtml(audio.ayahs[index].audio)}" aria-label="Recitation of ayah ${ayah.numberInSurah}"></audio>`;
+          fragment.append(card);
+        });
+        reader.append(fragment);
+        localStorage.setItem('quran-surah', surah);
+        setStatus(`${arabic.englishName} loaded — ${arabic.numberOfAyahs} ayahs. Use the audio controls to listen.`);
+      } catch (error) {
+        reader.innerHTML = '<div class="empty">We could not load this surah. Please try again.</div>';
+        setStatus('Loading failed. Check your internet connection or try another surah.');
+      } finally { loadButton.disabled = false; }
+    }
+
+    languageSelect.innerHTML = Object.entries(translations).map(([key, item]) => `<option value="${key}">${item.label}</option>`).join('');
+    loadButton.addEventListener('click', loadReader);
+    surahSelect.addEventListener('change', loadReader);
+    languageSelect.addEventListener('change', () => { if (surahSelect.value) loadReader(); });
+    loadSurahs();
+  </script>
+</body>
+</html>
