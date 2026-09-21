@@ -1,1 +1,10 @@
-
+{
+  "name": "Quran Reader",
+  "short_name": "Quran Reader",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f4f8f6",
+  "theme_color": "#0b6b57",
+  "description": "Read and listen to the Quran with English, French and transliteration support.",
+  "icons": []
+}
