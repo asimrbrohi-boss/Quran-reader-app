@@ -304,7 +304,31 @@ audio {
 <head>
   ...
   <style>
-    All CSS goes here
+    @media (max-width: 650px) {
+  .controls {
+    grid-template-columns: 1fr;
+  }
+
+  .options {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 0.75rem;
+  }
+
+  .check-label {
+    grid-column: 1 / -1;
+  }
+
+  #load {
+    min-width: 150px;
+    justify-self: end;
+  }
+
+  .ayah-head {
+    flex-wrap: wrap;
+  }
+}
   </style>
 </head>
 <body>
