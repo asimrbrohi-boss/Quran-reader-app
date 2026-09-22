@@ -8,38 +8,317 @@
   <link rel="manifest" href="manifest.json">
   <title>Quran Reader</title>
   <style>
-    :root { color-scheme: light; --green:#0b6b57; --ink:#19332d; --muted:#66756f; --paper:#fff; --bg:#f4f8f6; --line:#dce8e3; --gold:#c79537; }
-    :root.dark { color-scheme: dark; --green:#62c7a8; --ink:#e6f0ed; --muted:#a8bab4; --paper:#182521; --bg:#0f1715; --line:#30433c; --gold:#c79537; }
-    * { box-sizing:border-box; }
-    body { margin:0; font-family:system-ui,-apple-system,"Segoe UI",sans-serif; color:var(--ink); background:var(--bg); transition:background .2s,color .2s; }
-    header { color:white; background:linear-gradient(135deg,#075441,#129071); padding:2.5rem 1rem 2rem; }
-    .wrap { width:min(100% - 2rem,900px); margin:auto; }
-    h1 { margin:0 0 .4rem; font-size:clamp(1.8rem,5vw,2.8rem); }
-    header p { margin:.2rem 0 0; opacity:.9; }
-    .controls { display:grid; grid-template-columns:1fr 1fr auto; gap:.75rem; margin-top:1.5rem; align-items:end; }
-    .options { display:flex; flex-wrap:wrap; gap:.75rem 1rem; margin-top:1rem; align-items:center; }
-    label { display:grid; gap:.35rem; font-size:.85rem; font-weight:650; }
-    .check-label { display:flex; align-items:center; gap:.45rem; font-weight:600; }
-    select,button { min-height:44px; border:1px solid var(--line); border-radius:10px; padding:.65rem .8rem; font:inherit; background:var(--paper); color:var(--ink); }
-    header select,header button { color:#19332d; }
-    button { cursor:pointer; font-weight:700; }
-    button.primary { background:var(--gold); border-color:var(--gold); color:#fff; }
-    button.theme { margin-top:1rem; background:rgba(255,255,255,.15); border-color:rgba(255,255,255,.5); color:#fff; }
-    button:disabled { opacity:.55; cursor:not-allowed; }
-    main { padding:1.5rem 0 3rem; }
-    .notice { color:var(--muted); margin:.5rem 0 1rem; }
-    .ayah { background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:1.2rem; margin:1rem 0; box-shadow:0 3px 12px rgba(27,89,64,.06); }
-    .ayah.playing { border-color:var(--gold); box-shadow:0 0 0 2px rgba(199,149,55,.25); }
-    .ayah-head { display:flex; justify-content:space-between; gap:1rem; color:var(--muted); font-size:.85rem; }
-    .arabic { direction:rtl; text-align:right; font-family:Georgia,"Times New Roman",serif; font-size:clamp(1.65rem,4vw,2.25rem); line-height:1.9; margin:1rem 0; }
-    .translit { color:var(--green); font-style:italic; line-height:1.6; }
-    .translation { line-height:1.65; margin:.65rem 0 0; }
-    .translation strong { color:var(--green); }
-    audio { width:100%; margin-top:1rem; height:38px; }
-    .empty { text-align:center; padding:3rem 1rem; color:var(--muted); }
-    .credit { text-align:center; color:var(--muted); font-size:.8rem; margin-top:2rem; }
-    @media (max-width:650px) { .controls { grid-template-columns:1fr; } .ayah-head { flex-wrap:wrap; } }
+   
   </style>
+  :root {
+  color-scheme: light;
+  --green: #0b6b57;
+  --green-dark: #075441;
+  --ink: #19332d;
+  --muted: #66756f;
+  --paper: rgba(255, 255, 255, 0.96);
+  --bg: #f4f8f6;
+  --line: #dce8e3;
+  --gold: #c79537;
+  --shadow: rgba(27, 89, 64, 0.08);
+  --pattern: rgba(11, 107, 87, 0.04);
+}
+
+:root.dark {
+  color-scheme: dark;
+  --green: #62c7a8;
+  --green-dark: #0b3d32;
+  --ink: #e6f0ed;
+  --muted: #a8bab4;
+  --paper: rgba(22, 31, 29, 0.95);
+  --bg: #0d1715;
+  --line: #2e3d38;
+  --gold: #d7ab4e;
+  --shadow: rgba(0, 0, 0, 0.28);
+  --pattern: rgba(98, 199, 168, 0.04);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+  background: var(--bg);
+}
+
+body {
+  position: relative;
+  min-height: 100vh;
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at top left, rgba(255,255,255,0.22), transparent 26%),
+    radial-gradient(circle at bottom right, rgba(199,149,55,0.08), transparent 22%),
+    linear-gradient(180deg, rgba(7,84,65,0.04), rgba(7,84,65,0.01)),
+    var(--bg);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(11, 107, 87, 0.033) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(11, 107, 87, 0.033) 1px, transparent 1px);
+  background-size: 28px 28px;
+  mask-image: radial-gradient(circle at center, black 35%, transparent 100%);
+  opacity: 0.8;
+}
+
+header {
+  position: relative;
+  overflow: hidden;
+  color: #fff;
+  background:
+    linear-gradient(135deg, rgba(7,84,65,0.96), rgba(18,144,113,0.94)),
+    repeating-linear-gradient(
+      45deg,
+      transparent 0,
+      transparent 12px,
+      rgba(255,255,255,0.04) 12px,
+      rgba(255,255,255,0.04) 13px
+    );
+  border-bottom: 3px solid var(--gold);
+  padding: 2.5rem 1rem 2rem;
+}
+
+header::before,
+header::after {
+  content: "";
+  position: absolute;
+  width: 160px;
+  height: 160px;
+  border: 1px solid rgba(255,255,255,0.18);
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+
+header::before {
+  right: 8%;
+  top: -95px;
+  box-shadow:
+    0 0 0 18px rgba(255,255,255,0.04),
+    0 0 0 36px rgba(255,255,255,0.025);
+}
+
+header::after {
+  left: 6%;
+  bottom: -118px;
+  box-shadow:
+    0 0 0 18px rgba(255,255,255,0.04),
+    0 0 0 36px rgba(255,255,255,0.025);
+}
+
+.wrap {
+  position: relative;
+  z-index: 1;
+  width: min(100% - 2rem, 900px);
+  margin: auto;
+}
+
+h1 {
+  margin: 0 0 0.4rem;
+  font-size: clamp(1.8rem, 5vw, 2.8rem);
+  letter-spacing: 0.02em;
+}
+
+header p {
+  margin: 0.2rem 0 0;
+  opacity: 0.9;
+}
+
+.controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  align-items: end;
+}
+
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  margin-top: 1rem;
+  align-items: center;
+}
+
+label {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 650;
+}
+
+.check-label {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-weight: 600;
+}
+
+select,
+button {
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.65rem 0.8rem;
+  font: inherit;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+header select,
+header button {
+  color: #19332d;
+}
+
+button {
+  cursor: pointer;
+  font-weight: 700;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px var(--shadow);
+}
+
+button.primary {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #fff;
+}
+
+button.theme {
+  margin-top: 1rem;
+  background: rgba(255,255,255,0.15);
+  border-color: rgba(255,255,255,0.5);
+  color: #fff;
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+main {
+  padding: 1.5rem 0 3rem;
+}
+
+.notice {
+  color: var(--muted);
+  margin: 0.5rem 0 1rem;
+}
+
+.ayah {
+  position: relative;
+  overflow: hidden;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 1.2rem;
+  margin: 1rem 0;
+  box-shadow: 0 4px 16px var(--shadow);
+  backdrop-filter: blur(4px);
+}
+
+.ayah::before {
+  content: "✦";
+  position: absolute;
+  top: 0;
+  right: 0.7rem;
+  color: var(--gold);
+  font-size: 1.1rem;
+  opacity: 0.55;
+}
+
+.ayah.playing {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px rgba(199,149,55,0.25);
+}
+
+.ayah-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+  padding-right: 1.2rem;
+}
+
+.arabic {
+  direction: rtl;
+  text-align: right;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.65rem, 4vw, 2.25rem);
+  line-height: 1.9;
+  margin: 1rem 0;
+  color: var(--ink);
+}
+
+.translit {
+  color: var(--green);
+  font-style: italic;
+  line-height: 1.6;
+}
+
+.translation {
+  line-height: 1.65;
+  margin: 0.65rem 0 0;
+}
+
+.translation strong {
+  color: var(--green);
+}
+
+audio {
+  width: 100%;
+  height: 38px;
+  margin-top: 1rem;
+}
+
+.empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--muted);
+}
+
+.credit {
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.8rem;
+  margin-top: 2rem;
+}
+
+@media (max-width: 650px) {
+  .controls {
+    grid-template-columns: 1fr;
+  }
+
+  .ayah-head {
+    flex-wrap: wrap;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
 </head>
 <body>
   <header>
