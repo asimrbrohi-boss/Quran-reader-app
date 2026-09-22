@@ -301,24 +301,19 @@ audio {
   margin-top: 2rem;
 }
 
-@media (max-width: 650px) {
-  .controls {
-    grid-template-columns: 1fr;
-  }
-
-  .ayah-head {
-    flex-wrap: wrap;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    transition: none !important;
-    scroll-behavior: auto !important;
-  }
-}
+<head>
+  ...
+  <style>
+    All CSS goes here
+  </style>
+</head>
+<body>
+  All page content
+  <script>
+    All JavaScript
+  </script>
+</body>
+</html>
 </head>
 <body>
   <header>
