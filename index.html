@@ -325,14 +325,25 @@ audio {
         <label>Translation<select id="language" aria-label="Choose translation"></select></label>
         <button id="load" class="primary">Load surah</button>
       </div>
-      <div class="options">
-        <label class="check-label"><input id="continuous" type="checkbox"> Continuous recitation</label>
-        <label>Speed<select id="speed" aria-label="Recitation speed">
-          <option value="0.75">0.75×</option><option value="1" selected>Normal</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option><option value="2">2×</option>
-        </select></label>
-      </div>
-      <button id="theme" class="theme" type="button">🌙 Dark mode</button>
-    </div>
+    <div class="options">
+  <label class="check-label">
+    <input id="continuous" type="checkbox">
+    Continuous recitation
+  </label>
+
+  <label>
+    Speed
+    <select id="speed" aria-label="Recitation speed">
+      <option value="0.75">0.75×</option>
+      <option value="1" selected>Normal</option>
+      <option value="1.25">1.25×</option>
+      <option value="1.5">1.5×</option>
+      <option value="2">2×</option>
+    </select>
+  </label>
+
+  <button id="load" class="primary">Load surah</button>
+</div>
   </header>
   <main class="wrap">
     <p id="status" class="notice" role="status">Choose a surah to begin.</p>
