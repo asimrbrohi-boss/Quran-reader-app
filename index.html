@@ -19,7 +19,6 @@
       --bg: #f4f8f6;
       --line: #dce8e3;
       --gold: #c79537;
-      --gold-soft: #e6c67a;
       --shadow: rgba(27, 89, 64, 0.08);
       --pattern: rgba(11, 107, 87, 0.04);
     }
@@ -34,7 +33,6 @@
       --bg: #0d1715;
       --line: #2e3d38;
       --gold: #d7ab4e;
-      --gold-soft: #f0d38f;
       --shadow: rgba(0, 0, 0, 0.28);
       --pattern: rgba(98, 199, 168, 0.04);
     }
@@ -93,24 +91,24 @@
       overflow: hidden;
       color: #fff;
       background:
-        linear-gradient(135deg, rgba(7,84,65,0.99), rgba(18,144,113,0.96)),
+        linear-gradient(135deg, rgba(7,84,65,0.98), rgba(18,144,113,0.95)),
         repeating-linear-gradient(
           45deg,
           transparent 0,
           transparent 12px,
-          rgba(255,255,255,0.038) 12px,
-          rgba(255,255,255,0.038) 13px
+          rgba(255,255,255,0.035) 12px,
+          rgba(255,255,255,0.035) 13px
         );
       border-bottom: 3px solid var(--gold);
-      padding: 2.9rem 1rem 2.3rem;
+      padding: 2.8rem 1rem 2.2rem;
     }
 
     header::before,
     header::after {
       content: "";
       position: absolute;
-      width: 180px;
-      height: 180px;
+      width: 170px;
+      height: 170px;
       border: 1px solid rgba(255,255,255,0.16);
       transform: rotate(45deg);
       pointer-events: none;
@@ -118,33 +116,18 @@
 
     header::before {
       right: 8%;
-      top: -108px;
+      top: -100px;
       box-shadow:
         0 0 0 18px rgba(255,255,255,0.025),
-        0 0 0 35px rgba(255,255,255,0.018);
+        0 0 0 34px rgba(255,255,255,0.018);
     }
 
     header::after {
       left: 6%;
-      bottom: -128px;
+      bottom: -120px;
       box-shadow:
         0 0 0 18px rgba(255,255,255,0.025),
-        0 0 0 35px rgba(255,255,255,0.018);
-    }
-
-    .header-crescent {
-      position: absolute;
-      right: 17%;
-      top: 18px;
-      width: 62px;
-      height: 62px;
-      border: 2px solid rgba(255,255,255,0.35);
-      border-right-color: transparent;
-      border-bottom-color: transparent;
-      border-radius: 50%;
-      transform: rotate(35deg);
-      opacity: 0.75;
-      pointer-events: none;
+        0 0 0 34px rgba(255,255,255,0.018);
     }
 
     .wrap {
@@ -155,7 +138,7 @@
     }
 
     h1 {
-      margin: 0 0 0.25rem;
+      margin: 0 0 0.2rem;
       font-size: clamp(1.8rem, 5vw, 2.8rem);
       letter-spacing: 0.02em;
     }
@@ -234,7 +217,7 @@
     }
 
     button.primary {
-      background: linear-gradient(180deg, var(--gold-soft), var(--gold));
+      background: var(--gold);
       border-color: var(--gold);
       color: #fff;
     }
@@ -280,7 +263,7 @@
       right: 0.8rem;
       color: var(--gold);
       font-size: 1rem;
-      opacity: 0.62;
+      opacity: 0.6;
     }
 
     .ayah.playing {
@@ -379,7 +362,6 @@
 </head>
 <body>
   <header>
-    <div class="header-crescent"></div>
     <div class="wrap">
       <h1>Quran Reader</h1>
       <p class="subtitle">Read • Reflect • Recite</p>
